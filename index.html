@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpellingKids - Login</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f0f8ff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 300px; }
+        h1 { color: #ff6b6b; margin-bottom: 1.5rem; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 2px solid #eee; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; margin-top: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        .btn-admin { background-color: #4ecdc4; color: white; }
+        .btn-admin:hover { background-color: #45b7ae; }
+        .btn-guest { background-color: #f7d794; color: #574b90; }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <h1>SpellingKids</h1>
+    
+    <form id="loginForm">
+        <input type="text" id="username" placeholder="Usuario" required>
+        <input type="password" id="password" placeholder="Contraseña" required>
+        <button type="submit" id="submitBtn" class="btn-admin">Entrar como Admin</button>
+    </form>
+
+    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+    <button onclick="enterAsGuest()" class="btn-guest">Entrar como Invitado</button>
+</div>
+
+<script>
+    const form = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault(); 
+
+        // Bloqueamos el botón para evitar múltiples clics en la prueba de carga
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Validando...';
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            // LLAMADA AL BACKEND (API POST)
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                alert('¡Acceso concedido por el servidor!');
+                window.location.href = 'juego.html';
+            } else {
+                alert('Error: ' + (data.message || 'Credenciales incorrectas'));
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Entrar como Admin';
+            }
+        } catch (error) {
+            console.error('Error en la petición:', error);
+            alert('No se pudo conectar con el servidor backend');
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Entrar como Admin';
+        }
+    });
+
+    function enterAsGuest() {
+        // Los invitados pueden saltarse la validación de API o podrías crear una ruta /api/guest
+        window.location.href = 'juego.html';
+    }
+</script>
+
+</body>
+</html>
